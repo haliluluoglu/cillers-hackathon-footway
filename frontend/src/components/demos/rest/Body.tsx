@@ -92,7 +92,7 @@ const Card: React.FC<{ product: ProductType, activeItems: string[]; updateItems:
 }) => {
   const isActive = activeItems.includes(product.id)
   return (
-    <div className={`w-64 2xl:w-72 bg-white shadow-md rounded-xl duration-500 hover:scale-105 hover:shadow-xl ${isActive ? "scale-105 shadow-xl border-4 border-purple-400 duration-100" : ""}`}>
+    <div className={`w-64 2xl:w-72 bg-white shadow-md rounded-xl duration-500 hover:scale-105 hover:shadow-xl ${isActive ? "scale-105 shadow-xl border-4 border-primary duration-100" : ""}`}>
       <a href={product.link} onClick={() => updateItems(product.id)}>
         <img src={product.image.src}
           alt="Product" className="h-80 w-72 object-cover rounded-t-xl" />

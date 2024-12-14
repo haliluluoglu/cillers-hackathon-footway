@@ -7,6 +7,7 @@ export interface Response {
 export interface Message {
   role: 'user' | 'bot';
   content: string;
+  preParse?: boolean
 }
 
 export function createChatApi(client: ApiClientInterface) {

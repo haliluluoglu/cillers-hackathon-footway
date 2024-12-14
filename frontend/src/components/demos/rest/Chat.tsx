@@ -9,10 +9,14 @@ interface ItemsProps {
 
 const Chat: React.FC<ItemsProps> = ({ client }) => {
   const chatApi = createChatApi(client);
-  const bunda = useContext(ProductContext)
-  console.log(bunda)
+  const activeProducts = useContext(ProductContext)
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  React.useEffect(() => {
+    if (activeProducts.length > 0)
+      setMessages((prev) => [...prev.filter(mes => !mes.preParse), { content: activeProducts.map(prod => prod.name).join(", "), role: 'user', preParse: true }])
+    else setMessages([])
+  }, [activeProducts])
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -32,12 +36,11 @@ const Chat: React.FC<ItemsProps> = ({ client }) => {
       ]);
     }
   };
-
   return (
     <div className="flex-1 flex flex-col justify-between h-full">
       <div className="flex-1 p-4 overflow-y-auto bg-white">
         <div className="space-y-4 flex flex-col" >
-          {
+          {messages.length > 0 &&
             messages.map((message, index) => (
               <div
                 key={index}
