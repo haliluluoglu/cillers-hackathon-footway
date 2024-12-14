@@ -41,8 +41,15 @@ git clone https://github.com/aeriksson/cillers-hackathon-footway.git
 cd cillers-hackathon-footway
 ```
 
-Then run the following command to start the app:
+Next, set the API keys you've been provided with as secrets:
+```bash
+pt secret set openai-api-key sk-proj-...
+pt secret set anthropic-api-key sk-ant-...
+pt secret set footway-api-key ...
 ```
+
+Finally, run the following command to start the app:
+```bash
 pt run stack
 ```
 
