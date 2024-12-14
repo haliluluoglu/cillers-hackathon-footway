@@ -27,6 +27,18 @@ class DemoRequest(BaseModel):
 class DemoResponse(BaseModel):
     message: str
 
+class Image:
+    src: str
+    alt: str
+
+class WardrobeStore(BaseModel):
+    id: str
+    name: str
+    description: str
+    category: str
+    image: List[Image]
+
+
 ## Footway ##
 
 class InventorySearchResponse(BaseModel):

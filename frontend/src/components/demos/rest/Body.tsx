@@ -105,7 +105,7 @@ const Card: React.FC<{ product: ProductType, activeItems: string[]; updateItems:
         <img src={product.image.src}
           alt="Product" className="h-80 w-72 object-cover rounded-t-xl" />
         <div className="px-4 py-3 w-full">
-          <span className="text-gray-400 mr-3 uppercase text-xs">{product.brand}</span>
+          <span className="text-gray-400 mr-3 uppercase text-xs">{productCategories.find(cat => cat.value === product.category)?.verbose ?? ""}</span>
           <p className="text-lg font-bold text-black truncate block capitalize">{product.name}</p>
           <div className="flex items-center">
             <div className="ml-auto">
