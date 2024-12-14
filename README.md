@@ -37,8 +37,8 @@ This app has two main components:
 To run the app, clone this repository and navigate to the project directory:
 
 ```bash
-git clone https://github.com/aeriksson/cillers-footway-hackathon.git
-cd cillers-footway-hackathon
+git clone https://github.com/aeriksson/cillers-hackathon-footway.git
+cd cillers-hackathon-footway
 ```
 
 Then run the following command to start the app:
