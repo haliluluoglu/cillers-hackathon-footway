@@ -1,0 +1,20 @@
+_format_version: '2.1'
+_transform: true
+
+services:
+
+- name: frontend
+  url: http://frontend
+  routes:
+  - name: frontend-route
+    strip_path: false
+    paths:
+    - /
+
+- name: api
+  url: http://api
+  routes:
+  - name: api-route
+    strip_path: false
+    paths:
+    - /api
