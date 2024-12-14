@@ -5,11 +5,11 @@ import Body from './demos/rest/Body';
 const Main: React.FC = () => {
   const component: React.ReactElement = (() => {
     return (
-      <main className="min-h-screen flex flex-row bg-neutral text-neutral-content">
-        <div className='w-96 bg-red-300 flex-1'>
+      <main className="h-screen flex flex-row bg-neutral text-neutral-content">
+        <div className='bg-gray-100 flex-[2] h-full overflow-auto'>
           <Body />
         </div>
-        <div className='min-w-[400px]'>
+        <div className='flex-1'>
           <Demo />
         </div>
       </main>

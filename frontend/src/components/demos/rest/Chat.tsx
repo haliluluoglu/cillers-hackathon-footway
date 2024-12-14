@@ -32,7 +32,7 @@ const Chat: React.FC<ItemsProps> = ({ client }) => {
 
   return (
     <div className="flex-1 flex flex-col justify-between h-full">
-      <div className="flex-1 p-4 overflow-y-auto bg-yellow-50">
+      <div className="flex-1 p-4 overflow-y-auto bg-white">
         <div className="space-y-4 flex flex-col" >
           {
             messages.map((message, index) => (
