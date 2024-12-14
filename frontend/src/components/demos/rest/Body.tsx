@@ -1,7 +1,7 @@
 import React from 'react'
-import { ProductType } from 'src/types';
+import { productCategories, ProductCategoryTypes, ProductType } from 'src/types';
 
-const products = [
+const products: ProductType[] = [
   {
     id: "123",
     image: {
@@ -11,7 +11,8 @@ const products = [
     link: "#",
     name: "Product 1",
     brand: "Brand 1",
-    description: "Blablabla"
+    description: "Blablabla",
+    category: 'top'
   },
   {
     id: "124",
@@ -22,7 +23,9 @@ const products = [
     link: "#",
     name: "Product 2",
     brand: "Brand 2",
-    description: "Blablabla"
+    description: "Blablabla",
+    category: 'top'
+
   },
   {
     id: "125",
@@ -33,7 +36,8 @@ const products = [
     link: "#",
     name: "Product 3",
     brand: "Brand 1",
-    description: "Blablabla"
+    description: "Blablabla",
+    category: 'bottom'
   },
   {
     id: "126",
@@ -44,7 +48,8 @@ const products = [
     link: "#",
     name: "Product 4",
     brand: "Brand 2",
-    description: "Blablabla"
+    description: "Blablabla",
+    category: 'foot'
   },
   {
     id: "127",
@@ -55,7 +60,8 @@ const products = [
     link: "#",
     name: "Product 5",
     brand: "Brand 2",
-    description: "Blablabla"
+    description: "Blablabla",
+    category: 'accessories'
   },
   {
     id: "128",
@@ -66,7 +72,8 @@ const products = [
     link: "#",
     name: "Product 6",
     brand: "Brand 3",
-    description: "Blablabla"
+    description: "Blablabla",
+    category: 'under'
   },
   {
     id: "129",
@@ -77,7 +84,8 @@ const products = [
     link: "#",
     name: "Product 7",
     brand: "Brand 3",
-    description: "Blablabla"
+    description: "Blablabla",
+    category: 'out'
   },
 ]
 
@@ -113,6 +121,7 @@ const Card: React.FC<{ product: ProductType, activeItems: string[]; updateItems:
 }
 const Body: React.FC<{ updateGlobalProducts: (product: ProductType) => void }> = ({ updateGlobalProducts }: { updateGlobalProducts: (product: ProductType) => void }) => {
   const [activeItems, setActiveItems] = React.useState<string[]>([])
+  const [activeCategory, setActiveCategory] = React.useState<ProductCategoryTypes | undefined>(undefined)
 
   return (
     <div>
@@ -120,27 +129,49 @@ const Body: React.FC<{ updateGlobalProducts: (product: ProductType) => void }> =
         <h1 className="font-bold text-4xl mb-4">Smart Wardrobe</h1>
         <h3 className="text-3xl" >Here are your current items</h3 >
       </div >
-      <section id="Projects"
-        className="w-fit mx-auto grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 justify-items-center justify-center gap-y-20 gap-x-14 mt-10 mb-5">
-        {
-          products.length > 0 ? products.map((product) => {
-            return (
-              <Card
-                activeItems={activeItems}
-                key={product.id}
-                product={product}
-                updateItems={() => {
-                  setActiveItems(items => {
-                    if (items.includes(product.id)) {
-                      return items.filter(item => item !== product.id)
-                    }
-                    return [...items, product.id]
-                  })
-                  updateGlobalProducts(product)
-                }} />
-            )
-          })
-            : <div>Nothing in the wardrobe yet...</div>
+      <section id="Projects" className="w-fit mx-auto flex flex-col gap-1">
+        <select className="select select-bordered w-full max-w-xs self-end" onChange={(e) => {
+          if (e.target.value === "all") {
+            setActiveCategory(undefined)
+            return
+          }
+          setActiveCategory(e.target.value as ProductCategoryTypes)
+        }
+        }>
+          <option disabled selected>Do you want to pick a category?</option>
+          {
+            productCategories.map((cat, i) => {
+              return (
+                <option key={i} value={cat.value}>{cat.verbose}</option>
+              )
+            })
+          }
+          <option value={"all"}>All</option>
+        </select>
+        {products.filter(prod => activeCategory === undefined ? true : prod.category === activeCategory).length > 0 ?
+          <div className='grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 justify-items-center justify-center gap-y-20 gap-x-14 mt-10 mb-5'>
+            {
+              products.filter(product => activeCategory === undefined ? true : product.category === activeCategory).map((product) => {
+                return (
+                  <Card
+                    activeItems={activeItems}
+                    key={product.id}
+                    product={product}
+                    updateItems={() => {
+                      setActiveItems(items => {
+                        if (items.includes(product.id)) {
+                          return items.filter(item => item !== product.id)
+                        }
+                        return [...items, product.id]
+                      })
+                      updateGlobalProducts(product)
+                    }} />
+                )
+              })
+            }
+          </div>
+          : <div className='w-full mt-10 mb-5'>Nothing in the wardrobe yet...</div>
+
         }
       </section>
     </div >
