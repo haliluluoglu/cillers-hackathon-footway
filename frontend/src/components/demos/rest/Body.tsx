@@ -1,16 +1,5 @@
 import React from 'react'
-
-type ProductType = {
-  id: string;
-  image: {
-    src: string;
-    alt: string
-  },
-  name: string;
-  link: string;
-  brand: string;
-  description: string
-}
+import { ProductType } from 'src/types';
 
 const products = [
   {
@@ -92,9 +81,18 @@ const products = [
   },
 ]
 
-const Card: React.FC<{ product: ProductType, updateItems: () => void }> = ({ product, updateItems }: { product: ProductType, updateItems: (item: string) => void }) => {
+const Card: React.FC<{ product: ProductType, activeItems: string[]; updateItems: () => void }> = ({
+  product,
+  activeItems,
+  updateItems
+}: {
+  product: ProductType,
+  activeItems: string[];
+  updateItems: (item: string) => void
+}) => {
+  const isActive = activeItems.includes(product.id)
   return (
-    <div className="w-64 2xl:w-72 bg-white shadow-md rounded-xl duration-500 hover:scale-105 hover:shadow-xl">
+    <div className={`w-64 2xl:w-72 bg-white shadow-md rounded-xl duration-500 hover:scale-105 hover:shadow-xl ${isActive ? "scale-105 shadow-xl border-4 border-purple-400 duration-100" : ""}`}>
       <a href={product.link} onClick={() => updateItems(product.id)}>
         <img src={product.image.src}
           alt="Product" className="h-80 w-72 object-cover rounded-t-xl" />
@@ -103,7 +101,9 @@ const Card: React.FC<{ product: ProductType, updateItems: () => void }> = ({ pro
           <p className="text-lg font-bold text-black truncate block capitalize">{product.name}</p>
           <div className="flex items-center">
             <div className="ml-auto">
-              <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1.4em" width="1.4em" xmlns="http://www.w3.org/2000/svg"><path d="M11 11V7H13V11H17V13H13V17H11V13H7V11H11ZM12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20Z"></path></svg>
+              <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1.4em" width="1.4em" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 11V7H13V11H17V13H13V17H11V13H7V11H11ZM12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20Z"></path>
+              </svg>
             </div>
           </div>
         </div>
@@ -111,11 +111,12 @@ const Card: React.FC<{ product: ProductType, updateItems: () => void }> = ({ pro
     </div>
   )
 }
-const Body: React.FC = () => {
+const Body: React.FC<{ updateGlobalProducts: (product: ProductType) => void }> = ({ updateGlobalProducts }: { updateGlobalProducts: (product: ProductType) => void }) => {
   const [activeItems, setActiveItems] = React.useState<string[]>([])
+
   return (
     <div>
-      <div className="text-center p-10">
+      <div className="text-center p-10 text-gray-600">
         <h1 className="font-bold text-4xl mb-4">Smart Wardrobe</h1>
         <h3 className="text-3xl" >Here are your current items</h3 >
       </div >
@@ -125,6 +126,7 @@ const Body: React.FC = () => {
           products.length > 0 ? products.map((product) => {
             return (
               <Card
+                activeItems={activeItems}
                 key={product.id}
                 product={product}
                 updateItems={() => {
@@ -134,7 +136,7 @@ const Body: React.FC = () => {
                     }
                     return [...items, product.id]
                   })
-
+                  updateGlobalProducts(product)
                 }} />
             )
           })

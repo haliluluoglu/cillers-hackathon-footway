@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { ProductContext } from 'src/context/MessageContext';
+import { createChatApi, Message } from 'src/rest/modules/chat';
 import { ApiClientRest } from '../../../rest/api_client_rest'
-import { createChatApi, Message } from '../../../rest/modules/chat'
 
 interface ItemsProps {
   client: ApiClientRest
@@ -8,6 +9,8 @@ interface ItemsProps {
 
 const Chat: React.FC<ItemsProps> = ({ client }) => {
   const chatApi = createChatApi(client);
+  const bunda = useContext(ProductContext)
+  console.log(bunda)
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
 
