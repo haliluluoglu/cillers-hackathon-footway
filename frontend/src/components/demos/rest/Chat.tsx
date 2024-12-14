@@ -3,7 +3,7 @@ import { ApiClientRest } from '../../../rest/api_client_rest'
 import { createChatApi, Message } from '../../../rest/modules/chat'
 
 interface ItemsProps {
-    client: ApiClientRest
+  client: ApiClientRest
 }
 
 const Chat: React.FC<ItemsProps> = ({ client }) => {
@@ -31,25 +31,26 @@ const Chat: React.FC<ItemsProps> = ({ client }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
-      <div className="flex-1 p-4 overflow-y-auto">
-        <div className="space-y-4 flex flex-col">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`p-3 rounded ${
-                message.role === 'user'
+    <div className="flex-1 flex flex-col justify-between h-full">
+      <div className="flex-1 p-4 overflow-y-auto bg-yellow-50">
+        <div className="space-y-4 flex flex-col" >
+          {
+            messages.map((message, index) => (
+              <div
+                key={index}
+                className={`p-3 rounded ${message.role === 'user'
                   ? 'bg-primary text-primary-content self-end'
                   : 'bg-base-200'
-              }`}
-              style={{ maxWidth: '70%', alignSelf: message.role === 'user' ? 'flex-end' : 'flex-start' }}
-            >
-              {message.content}
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="p-4 bg-base-300">
+                  }`}
+                style={{ maxWidth: '70%', alignSelf: message.role === 'user' ? 'flex-end' : 'flex-start' }}
+              >
+                {message.content}
+              </div>
+            ))
+          }
+        </div >
+      </div >
+      <div className="p-4 bg-base-300 mt-auto">
         <div className="form-control">
           <div className="input-group flex">
             <input
@@ -66,7 +67,7 @@ const Chat: React.FC<ItemsProps> = ({ client }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
