@@ -30,8 +30,8 @@ For installation on Windows and Linux, see [the docs](https://polytope.com/docs/
 
 ## Components
 This app has two main components:
-- [The API](./code/api) - A simple REST API written in Python that serves as a backend for the app.
-- [The UI](./web-app) - A simple React UI written in TypeScript that serves as a frontend for the app.
+- [The API](./api) - A simple REST API written in Python that serves as a backend for the app.
+- [The UI](./frontend) - A simple React UI written in TypeScript that serves as a frontend for the app.
 
 ## Running the app
 To run the app, clone this repository and navigate to the project directory:
