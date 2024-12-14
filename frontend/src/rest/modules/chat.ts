@@ -7,7 +7,10 @@ export interface Response {
 export interface Message {
   role: 'user' | 'bot';
   content: string;
-  preParse?: boolean
+  images?: {
+    id: string;
+    src: string;
+  }[]
 }
 
 export function createChatApi(client: ApiClientInterface) {

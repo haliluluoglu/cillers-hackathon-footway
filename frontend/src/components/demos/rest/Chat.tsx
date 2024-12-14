@@ -14,7 +14,7 @@ const Chat: React.FC<ItemsProps> = ({ client }) => {
   const [input, setInput] = useState('');
   React.useEffect(() => {
     if (activeProducts.length > 0)
-      setMessages((prev) => [...prev.filter(mes => !mes.preParse), { content: activeProducts.map(prod => prod.name).join(", "), role: 'user', preParse: true }])
+      setMessages((prev) => [...prev.filter(mes => mes.images === undefined), { content: activeProducts.map(prod => prod.name).join(", "), role: 'user', images: activeProducts.map(prod => ({ src: prod.image.src, id: prod.id })) }])
     else setMessages([])
   }, [activeProducts])
 
@@ -41,18 +41,38 @@ const Chat: React.FC<ItemsProps> = ({ client }) => {
       <div className="flex-1 p-4 overflow-y-auto bg-white">
         <div className="space-y-4 flex flex-col" >
           {messages.length > 0 &&
-            messages.map((message, index) => (
-              <div
-                key={index}
-                className={`p-3 rounded ${message.role === 'user'
-                  ? 'bg-primary text-primary-content self-end'
-                  : 'bg-base-200'
-                  }`}
-                style={{ maxWidth: '70%', alignSelf: message.role === 'user' ? 'flex-end' : 'flex-start' }}
-              >
-                {message.content}
-              </div>
-            ))
+            messages.map((message, index) => {
+              if (message.images !== undefined) {
+                return (
+                  <div
+                    key={index}
+                    className={`p-3 rounded bg-primary text-primary-content self-end flex flex-col gap-4`}
+                    style={{ maxWidth: '70%', alignSelf: 'flex-end' }}
+                  >
+                    <p className='self-end text-primary-content'>I need help with these items:</p>
+                    <div className='flex gap-2 justify-end'>
+                      {message.images.map(image => {
+                        return (
+                          <img className="w-20 h-20 object-cover" src={image.src} alt="Product" />
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              }
+              return (
+                <div
+                  key={index}
+                  className={`p-3 rounded ${message.role === 'user'
+                    ? 'bg-primary text-primary-content self-end'
+                    : 'bg-base-200'
+                    }`}
+                  style={{ maxWidth: '70%', alignSelf: message.role === 'user' ? 'flex-end' : 'flex-start' }}
+                >
+                  {message.content}
+                </div>
+              )
+            })
           }
         </div >
       </div >
