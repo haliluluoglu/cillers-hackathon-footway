@@ -1,3 +1,4 @@
+from decimal import Decimal
 import os
 from typing import List, Optional, Tuple, Any, Dict
 import numpy as np
@@ -9,6 +10,52 @@ import requests
 import pandas as pd
 import json
 from io import StringIO
+
+from api.src.services.wardrobe import WardrobeItem
+
+class PostgresConnectionManager:
+    def __init__(
+        self,
+        host: str = None,
+        port: int = None,
+        database: str = None,
+        user: str = None,
+        password: str = None
+    ):
+        self.host = host or os.getenv("POSTGRES_HOST", "postgres")
+        self.port = port or int(os.getenv("POSTGRES_PORT", "5432"))
+        self.database = database or os.getenv("POSTGRES_DB", "footway")
+        self.user = user or os.getenv("POSTGRES_USER", "postgres")
+        self.password = password or os.getenv("POSTGRES_PASSWORD", "postgres")
+        self.conn: Optional[connection] = None
+        self.logger = logging.getLogger(__name__)
+
+    def connect(self) -> None:
+        """Establish connection to PostgreSQL database."""
+        try:
+            self.conn = psycopg2.connect(
+                host=self.host,
+                port=self.port,
+                database=self.database,
+                user=self.user,
+                password=self.password
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to connect to database: {str(e)}")
+            raise
+
+    def close(self) -> None:
+        """Close the database connection."""
+        if self.conn:
+            self.conn.close()
+            self.conn = None
+
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
 class PostgresVectorClient:
     def __init__(
@@ -275,3 +322,178 @@ class PostgresVectorClient:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+class PostgresWardrobeClient(PostgresConnectionManager):
+    def __init__(
+        self,
+        table_name: str = "wardrobe_items",
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.table_name = table_name
+
+    def initialize_table(self) -> None:
+        """Create the wardrobe items table if it doesn't exist."""
+        if not self.conn:
+            self.connect()
+
+        create_table_query = f"""
+        CREATE TABLE IF NOT EXISTS {self.table_name} (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            size VARCHAR(50) NOT NULL,
+            price DECIMAL(10,2) NOT NULL,
+            color VARCHAR(50) NOT NULL,
+            type VARCHAR(100) NOT NULL,
+            department VARCHAR(100) NOT NULL,
+            image_url TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(create_table_query)
+                self.conn.commit()
+        except Exception as e:
+            self.logger.error(f"Failed to initialize table: {str(e)}")
+            raise
+
+    def add_item(self, item: WardrobeItem) -> int:
+        """Add a new wardrobe item from WardrobeItem object."""
+        if not self.conn:
+            self.connect()
+
+        insert_query = f"""
+        INSERT INTO {self.table_name} 
+        (name, size, price, color, type, department, image_url)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        RETURNING id;
+        """
+
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(insert_query, (
+                    item.name,
+                    item.size,
+                    float(item.price),
+                    item.color,
+                    item.type,
+                    item.department,
+                    item.image_url
+                ))
+                item_id = cur.fetchone()[0]
+                self.conn.commit()
+                return item_id
+        except Exception as e:
+            self.logger.error(f"Failed to add item: {str(e)}")
+            raise
+
+    def get_item(self, item_id: int) -> Optional[WardrobeItem]:
+        """Get item by ID as WardrobeItem object."""
+        if not self.conn:
+            self.connect()
+
+        select_query = f"""
+        SELECT id, name, size, price, color, type, department, image_url, created_at
+        FROM {self.table_name}
+        WHERE id = %s;
+        """
+
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(select_query, (item_id,))
+                item = cur.fetchone()
+                if item:
+                    return WardrobeItem(
+                        id=item[0],
+                        name=item[1],
+                        size=item[2],
+                        price=Decimal(str(item[3])),
+                        color=item[4],
+                        type=item[5],
+                        department=item[6],
+                        image_url=item[7],
+                        created_at=item[8]
+                    )
+                return None
+        except Exception as e:
+            self.logger.error(f"Failed to get item: {str(e)}")
+            raise
+
+    def get_all_items(self) -> List[WardrobeItem]:
+        """Get all items in the wardrobe."""
+        if not self.conn:
+            self.connect()
+
+        select_query = f"""
+        SELECT id, name, size, price, color, type, department, image_url, created_at
+        FROM {self.table_name}
+        ORDER BY created_at DESC;
+        """
+
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(select_query)
+                return [WardrobeItem(
+                    id=item[0],
+                    name=item[1],
+                    size=item[2],
+                    price=Decimal(str(item[3])),
+                    color=item[4],
+                    type=item[5],
+                    department=item[6],
+                    image_url=item[7],
+                    created_at=item[8]
+                ) for item in cur.fetchall()]
+        except Exception as e:
+            self.logger.error(f"Failed to get all items: {str(e)}")
+            raise
+
+    def get_items_for_ids(self, wardrobeItemIds: List[int]) -> List[WardrobeItem]:
+        """Search items with ids, returning WardrobeItem objects."""
+        if not self.conn:
+            self.connect()
+        
+        select_query = f"""
+        SELECT id, name, size, price, color, type, department, image_url, created_at
+        FROM {self.table_name}
+        WHERE id IN %s
+        ORDER BY created_at DESC;
+        """
+
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(select_query, wardrobeItemIds)
+                return [WardrobeItem(
+                    id=item[0],
+                    name=item[1],
+                    size=item[2],
+                    price=Decimal(str(item[3])),
+                    color=item[4],
+                    type=item[5],
+                    department=item[6],
+                    image_url=item[7],
+                    created_at=item[8]
+                ) for item in cur.fetchall()]
+        except Exception as e:
+            self.logger.error(f"Failed to search items: {str(e)}")
+            raise
+
+    def delete_item(self, item_id: int) -> None:
+        """Delete item by ID."""
+        if not self.conn:
+            self.connect()
+
+        delete_query = f"""
+        DELETE FROM {self.table_name}
+        WHERE id = %s;
+        """
+
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(delete_query, (item_id,))
+                self.conn.commit()
+        except Exception as e:
+            self.logger.error(f"Failed to delete item: {str(e)}")
+            raise

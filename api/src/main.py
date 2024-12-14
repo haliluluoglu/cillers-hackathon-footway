@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes import router
-from clients.postgres import PostgresVectorClient
+from clients.postgres import PostgresVectorClient, PostgresWardrobeClient
 
 from utils import log
 
@@ -22,6 +22,9 @@ app.include_router(router, prefix="/api")
 vector_client = PostgresVectorClient()
 vector_client.initialize_table()
 vector_client.load_sample_data()
+
+wardrobe_client = PostgresWardrobeClient()
+wardrobe_client.initialize_table()
 
 app.add_middleware(
     CORSMiddleware,

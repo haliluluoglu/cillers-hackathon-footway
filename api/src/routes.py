@@ -6,8 +6,9 @@ from openai import OpenAI
 from anthropic import Anthropic
 from typing import List, Optional, Dict, Any
 
+from api.src.services.wardrobe import WardrobeItem, WardrobeService
 from clients.footway import FootwayClient, InventoryItem
-from clients.postgres import PostgresVectorClient
+from clients.postgres import PostgresVectorClient, PostgresWardrobeClient
 from utils import log
 
 logger = log.get_logger(__name__)
@@ -18,6 +19,14 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 anthropic_client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 #### Models ####
+
+## Wardrobe Models
+
+class GetWardrobeResponse(BaseModel):
+    wardrobeItems: List[WardrobeItem]
+
+class GetWardrobeItemResponse(BaseModel):
+    wardrobeItem: WardrobeItem
 
 ## Demo Endpoints ##
 
@@ -159,3 +168,34 @@ async def search_vector_inventory(
 
     finally:
         vector_client.close()
+
+
+@router.get("/wardrobe",
+             response_model=GetWardrobeResponse,
+             description="Fetches all wardrobe items")
+async def get_wardrobe() -> GetWardrobeResponse:
+    wardrobe_service = WardrobeService(PostgresWardrobeClient())
+
+    try:
+        response = wardrobe_service.get_all_items()
+
+        return GetWardrobeResponse(
+            wardrobeItems=response,
+        )
+    finally:
+        wardrobe_service.db_client.close()
+
+@router.get("/wardrobe/{item_id}",
+                response_model=GetWardrobeItemResponse,
+                description="Fetches a single wardrobe item by ID")
+async def get_wardrobe_item(item_id: int) -> GetWardrobeItemResponse:
+    wardrobe_service = WardrobeService(PostgresWardrobeClient())
+
+    try:
+        response = wardrobe_service.get_items_by_ids([item_id])[0]
+
+        return GetWardrobeItemResponse(
+            wardrobeItem=response,
+        )
+    finally:
+        wardrobe_service.db_client.close()
